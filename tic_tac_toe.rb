@@ -15,8 +15,8 @@ class Grid
   WIN = [[0, 1, 2], [3, 4, 5], [6, 7, 8],
          [0, 3, 6], [1, 4, 7], [2, 5, 8],
          [0, 4, 8], [2, 4, 6]].freeze
-  CHOICES = ['x', 'o'].freeze
-  
+  CHOICES = %w[x o].freeze
+
   attr_reader :player
 
   def initialize
@@ -29,29 +29,27 @@ class Grid
     moves = 0
     i = 0
 
-    get_players
+    assign_players
     create_grid
 
     until gameover
       choice = get_choice(@player[i])
       update(@player[i], choice)
-
-      if check_win?
-        gameover = true
-        win_msg(i)
-        puts 'GAMEOVER'
-        break
-      end
-
       moves += 1
-      
-      if moves == 9
+
+      if check_win? || moves == 9
         gameover = true
-        tie_msg
+
+        if check_win?
+          win_msg(i)
+        elsif moves == 9
+          tie_msg
+        end
+
         puts 'GAMEOVER'
       end
 
-      player[i] == player.first ? i = 1 : i = 0
+      i = player[i] == player.first ? 1 : 0
     end
   end
 
@@ -59,14 +57,14 @@ class Grid
 
   def create_grid
     i = 0
-    lines = {out: "    :   :    \n", mid: "----:---:----\n", pos: line_pos(i)}
-    layout = [:out, :pos, :mid, :pos, :mid, :pos, :out]
+    lines = { out: "    :   :    \n", mid: "----:---:----\n", pos: line_pos(i) }
+    layout = %i[out pos mid pos mid pos out]
     layout.each do |l|
       print lines[l]
       lines[:pos] = line_pos(i += 3) if l == :mid
     end
   end
- 
+
   def line_pos(i)
     "  #{@pos[i]} : #{@pos[i + 1]} : #{@pos[i + 2]}\n"
   end
@@ -76,12 +74,12 @@ class Grid
     create_grid
   end
 
-  def get_players
+  def assign_players
     token = ''
     x = 1
 
     2.times do
-      print "Player#{x}, Enter your name: "
+      print "Player #{x}, Enter your name: "
       name = gets.chomp
 
       if token == ''
@@ -90,7 +88,7 @@ class Grid
           token = gets.chomp
         end
       else
-        token == 'x' ? token = 'o' : token = 'x'
+        token = token == 'x' ? 'o' : 'x'
       end
 
       @player << Player.new(name, token)
@@ -106,8 +104,8 @@ class Grid
     print 'Are you crazy! Try again: '
   end
 
-  def win_msg(i)
-    puts "#{@player[i].name} is the winner! Suck it #{@player[i - 1].name}!"
+  def win_msg(index)
+    puts "#{@player[index].name} is the winner! Suck it #{@player[index - 1].name}!"
   end
 
   def tie_msg
@@ -131,8 +129,8 @@ class Grid
     choice
   end
 
-  def has_token?(i)
-    CHOICES.include?(@pos[i - 1])
+  def token?(index)
+    CHOICES.include?(@pos[index - 1])
   end
 end
 
