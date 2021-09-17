@@ -17,39 +17,33 @@ class Grid
          [0, 4, 8], [2, 4, 6]].freeze
   CHOICES = %w[x o].freeze
 
-  attr_reader :player
-
   def initialize
     @pos = (1..9).to_a
     @player = []
   end
 
   def play
-    gameover = false
-    moves = 0
-    i = 0
-
     assign_players
     create_grid
+    game
+  end
+
+  def game
+    gameover = false
+    moves = 0
 
     until gameover
-      choice = get_choice(@player[i])
-      update(@player[i], choice)
-      moves += 1
+      @player.each_with_index do |player, i|
+        choice = get_choice(player)
+        update(player, choice)
+        moves += 1
 
-      if check_win? || moves == 9
-        gameover = true
+        next unless check_win? || moves == 9
 
-        if check_win?
-          win_msg(i)
-        elsif moves == 9
-          tie_msg
-        end
-
-        puts 'GAMEOVER'
+        display_finish_msg(i, moves)
+        gameover = end_game
+        break
       end
-
-      i = player[i] == player.first ? 1 : 0
     end
   end
 
@@ -65,8 +59,8 @@ class Grid
     end
   end
 
-  def line_pos(i)
-    "  #{@pos[i]} : #{@pos[i + 1]} : #{@pos[i + 2]}\n"
+  def line_pos(index)
+    "  #{@pos[index]} : #{@pos[index + 1]} : #{@pos[index + 2]}\n"
   end
 
   def update(player, position)
@@ -110,6 +104,19 @@ class Grid
 
   def tie_msg
     puts 'You tied :( Try harder next time. Very disappointed in you both.'
+  end
+
+  def display_finish_msg(index, moves)
+    if check_win?
+      win_msg(index)
+    elsif moves == 9
+      tie_msg
+    end
+  end
+
+  def end_game
+    puts 'GAMEOVER'
+    true
   end
 
   def correct_choice?(choice)
