@@ -10,8 +10,8 @@ class Player
   end
 end
 
-# Grid
-class Grid
+# TicTacToe
+class TicTacToe
   WIN = [[0, 1, 2], [3, 4, 5], [6, 7, 8],
          [0, 3, 6], [1, 4, 7], [2, 5, 8],
          [0, 4, 8], [2, 4, 6]].freeze
@@ -26,25 +26,6 @@ class Grid
     assign_players
     create_grid
     game
-  end
-
-  def game
-    gameover = false
-    moves = 0
-
-    until gameover
-      @player.each_with_index do |player, i|
-        choice = get_choice(player)
-        update(player, choice)
-        moves += 1
-
-        next unless check_win? || moves == 9
-
-        display_finish_msg(i, moves)
-        gameover = end_game
-        break
-      end
-    end
   end
 
   private
@@ -73,8 +54,7 @@ class Grid
     x = 1
 
     2.times do
-      print "Player #{x}, Enter your name: "
-      name = gets.chomp
+      name = ask_name(x)
 
       if token == ''
         until CHOICES.include?(token)
@@ -90,12 +70,36 @@ class Grid
     end
   end
 
+  def game
+    gameover = false
+    moves = 0
+
+    until gameover
+      @player.each_with_index do |player, i|
+        choice = get_choice(player)
+        update(player, choice)
+        moves += 1
+
+        next unless check_win? || moves == 9
+
+        display_finish_msg(i, moves)
+        gameover = end_game
+        break
+      end
+    end
+  end
+
   def check_win?
     WIN.any? { |w| [@pos[w[0]], @pos[w[1]], @pos[w[2]]].uniq.size == 1 }
   end
 
   def wrong_move
     print 'Are you crazy! Try again: '
+  end
+
+  def ask_name(num)
+    print "Player #{num}, Enter your name: "
+    gets.chomp
   end
 
   def win_msg(index)
@@ -141,5 +145,5 @@ class Grid
   end
 end
 
-grid = Grid.new
-grid.play
+game = TicTacToe.new
+game.play
